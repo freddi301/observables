@@ -10,10 +10,10 @@
 
 // example:
 // log :: number => Observer<T>
-const logCount = step => item => {
-  console.log(step, item);
-  return logCount(step + 1);
-};
+// const logCount = step => item => {
+//   console.log(step, item);
+//   return logCount(step + 1);
+// };
 
 // An observable is a function that takes an observer
 // and calls it, retaining state when necessary
@@ -107,18 +107,15 @@ const memoize = observable => {
 
 // fluent is a decorator that enables fluent usage of the api
 const fluent = observable => {
-  const decorate0 = operator => fluent(operator(observable));
-  const decorate1 = operator => arg => fluent(operator(arg)(observable));
-  const decorate2 = operator => arg => arg2 =>
-    fluent(operator(arg)(arg2)(observable));
+  const decorate = operator => arg => fluent(operator(arg)(observable));
   return {
     observable,
-    map: decorate1(map),
-    filter: decorate1(filter),
-    flatMap: decorate1(flatMap),
-    scan: decorate2(scan),
-    memoize: decorate0(memoize),
-    pipe: decorate0
+    map: decorate(map),
+    filter: decorate(filter),
+    flatMap: decorate(flatMap),
+    scan: r => m => fluent(scan(r)(m)(observable)),
+    memoize: decorate(memoize),
+    pipe: operator => fluent(operator(observable))
   };
 };
 
@@ -180,8 +177,8 @@ const chain = (operator = map(identity)) => {
     filter: decorate1(filter),
     flatMap: decorate1(flatMap),
     scan: decorate2(scan),
-    memoize: decorate0(memoize),
-    pipe: decorate0
+    memoize: decorate1(memoize),
+    pipe: operatorFactory => chain(pipe(operator, operatorFactory))
   };
 };
 
@@ -213,25 +210,15 @@ const fluentStateful = cons => (operator = map(identity)) => {
     filter: decorate1(filter),
     flatMap: decorate1(flatMap),
     scan: decorate2(scan),
-    memoize: decorate0(memoize),
+    memoize: decorate1(memoize),
     pipe: decorate0
   };
 };
-
-// const createFluentOperators = (...decorate) => ({
-//   map: decorate[1](map),
-//   filter: decorate[1](filter),
-//   flatMap: decorate[1](flatMap),
-//   scan: decorate[2](scan),
-//   memoize: decorate[0](memoize),
-//   pipe: decorate[0]
-// })
 
 module.exports = {
   fromArray,
   pipe,
   fluent,
-  chain,
   hot,
   cold,
   once,
@@ -241,6 +228,8 @@ module.exports = {
   flatMap,
   scan,
   memoize,
+  chain,
+  fluentStateful,
   hotFluent: fluentStateful(hot),
   coldFluent: fluentStateful(cold)
 };

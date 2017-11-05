@@ -79,8 +79,7 @@ test("connecting stateful", () => {
 test("fluent", () => {
   const observable = fluent(fromArray([7, 8, 9]))
     .map(x => x + 1)
-    // .pipe(filter(x => x % 2 === 0))
-    .filter(x => x % 2 === 0)
+    .pipe(filter(x => x % 2 === 0))
     .flatMap(x => fromArray([x, x + 1, x * 2]))
     .scan(m => x => m + x)(-74).observable;
   const mock = mockObserver([-66, -57, -41, -31, -20, 0]);
