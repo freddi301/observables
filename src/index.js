@@ -133,14 +133,12 @@ const identity = x => x;
 // once :: T => Observable<T>
 const once = item => observer => observer(item);
 
-const applyTo = arg => fun => fun(arg);
-
 // creates a "hot" stateful observer (observers receive items from after subscription)
 const hot = (operator = identity) => {
   let observers = [];
   const decorate = operator(identity);
   const publish = item => {
-    observers = observers.map(applyTo(item));
+    observers = observers.map(once(item));
     return publish;
   };
   const subscribe = observer => {
@@ -156,7 +154,7 @@ const cold = (operator = identity) => {
   const decorate = operator(identity);
   const publish = item => {
     items.push(item);
-    observers = observers.map(applyTo(item));
+    observers = observers.map(once(item));
     return publish;
   };
   const subscribe = observer => {

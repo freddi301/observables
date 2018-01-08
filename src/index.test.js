@@ -109,3 +109,16 @@ test("stateful fluent", () => {
   observable.subscribe(mock.observer);
   expect(mock.complete).toBe(true);
 });
+
+test("examples", () => {
+  
+  const possibleText = chain().map()
+  const isValidDateString = dateString => !isNan(Date.parse(stringToDate(dateString)))
+  const stringToDate = dateString => {
+    const [day, month, year] = dateString.split("/").map(Number)
+    return new Date(`${year}-${month}-${day}`);
+  } 
+  const model = chain().filter(isValidDateString).map(stringToDate);
+  const error = chain().filter(negate(i))
+
+})
